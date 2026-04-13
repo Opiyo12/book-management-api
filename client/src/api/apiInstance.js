@@ -1,0 +1,11 @@
+import axios from 'axios';
+const apiInstance= axios.create({
+    baseURL: 'http://localhost:3000/api',
+    headers: {
+        'Content-Type': 'application/json'
+        
+    },
+    timeout: 5000
+})
+export default apiInstance;
+//You can add interceptors here for auth tokens, logging, etc.
