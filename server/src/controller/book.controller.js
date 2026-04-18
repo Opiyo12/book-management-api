@@ -1,7 +1,7 @@
 import { createBook ,getAllBooks, getBookById, deleteBook, updateBook} from "../services/book.service.js";
 
 export const  createBookController=async(req,res, next)=>{
-    const bookData=req.body;
+    
     try{
         const newBook=await createBook(bookData);
         res.status(201).json({

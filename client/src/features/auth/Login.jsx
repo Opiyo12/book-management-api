@@ -1,39 +1,51 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { setUser } from '../../utils/auth';
+import apiInstance from '../../api/apiInstance';
+import { useAuth } from '../../context/AuthContext';
 
 
 function Login() {
-  const [formData, setFormData] = useState({ username: '', password: '' });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate()
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { login, logout } = useAuth();
 
-
+  
   const handleChange = (event) => {
-    const { id, value } = event.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    setFormData({...formData, [event.target.name]:event.target.value});
   };
 
   const handleLogin = async (event) => {
     event.preventDefault();
     if (isLoading) return;
 
+    setError('');
     setIsLoading(true);
 
     try {
-      // Simulate API call latency for realistic button feedback.
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const response = await apiInstance.post('/auth/login', {
+        email: formData.email.trim(),
+        password: formData.password,
+      });
 
-      const user = {
-        name: formData.username || "Brian",
-        role: "root-user",
-      };
-
-      setUser(user);
-
-      if (user.role === "root-user") {
-        navigate("/super-admin");
+      const { token, refreshToken, data: user } = response.data;
+      if (!token || !user?.id || !user?.email) {
+        throw new Error("Invalid login response from server.");
       }
+
+      login({ user, token, refreshToken });
+
+      if (user.role === "admin") {
+        navigate("/super-admin");
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      logout();
+      const message =
+        err.response?.data?.message || 'Login failed. Check your credentials and try again.';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -49,17 +61,18 @@ function Login() {
           <h1 className='text-2xl font-bold text-center mb-6 text-slate-800'>Login</h1>
           <form onSubmit={handleLogin}>
             <div className='mb-4'>
-              <label className='block text-slate-700 text-sm font-semibold mb-2' htmlFor='username'>
-                Username
+              <label className='block text-slate-700 text-sm font-semibold mb-2' htmlFor='email'>
+                Email
               </label>
               <input
                 className='w-full py-2.5 px-3 text-slate-700 border border-slate-300 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition'
-                id='username'
-                type='text'
-                placeholder='Username'
-                value={formData.username}
+                id='email'
+                type='email'
+                placeholder='you@example.com'
+                value={formData.email}
                 onChange={handleChange}
-                autoComplete='username'
+                autoComplete='email'
+                name='email'
                 required
               />
             </div>
@@ -75,6 +88,7 @@ function Login() {
                 value={formData.password}
                 onChange={handleChange}
                 autoComplete='current-password'
+                name='password'
                 required
               />
             </div>
@@ -95,6 +109,7 @@ function Login() {
                 'Login'
               )}
             </button>
+            {error ? <p className='text-center text-sm text-red-600 mb-2'>{error}</p> : null}
             <p onClick={() => navigate('/forgot-password')} className='text-center text-sm text-blue-600 hover:text-blue-800 cursor-pointer'>
               Forgot password?
             </p>

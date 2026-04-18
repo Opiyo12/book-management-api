@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./features/auth/Login";
 import ForgotPassword from "./features/auth/ForgotPassword";
+import Unauthorized from "./features/auth/Unauthorized";
 
 import AdminLayout from "./features/dashboard/admin/AdminLayout";
 import ProtectedRoute from "./routes/ProtectedRoutes";
@@ -28,7 +29,7 @@ function App() {
       <Route
         path="/super-admin"
         element={
-          <ProtectedRoute role="root-user">
+          <ProtectedRoute role="admin">
             <AdminLayout />
           </ProtectedRoute>
         }
@@ -42,7 +43,8 @@ function App() {
         <Route path="users/add" element={<AddUsers />} />
         <Route path="users/roles" element={<UserRoles />} />
       </Route>
-      <Route path="/dashboard" element={<Navigate to="/super-admin" replace />} />
+      <Route path="/dashboard" element={<Navigate to="/" replace />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="*" element={<Navigate to="/" replace />} />
      
     </Routes>

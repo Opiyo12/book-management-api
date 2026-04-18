@@ -1,5 +1,5 @@
 import database from "../config/database.js";
-import AppError from "../utils/appError.js";
+import AppError from "../utils/AppError.js";
 
 // Create book
 export const createBook = async (bookData) => {
@@ -56,7 +56,7 @@ export const updateBook = async (book) => {
       category,
       published_year,
       id
-    ]
+    ] 
   );
 
   if (result.affectedRows === 0) {
